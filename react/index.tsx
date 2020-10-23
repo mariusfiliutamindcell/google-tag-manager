@@ -1,4 +1,4 @@
-import { canUseDOM } from 'vtex.render-runtime'
+import {canUseDOM} from 'vtex.render-runtime'
 
 import push from './modules/push'
 import {
@@ -8,9 +8,9 @@ import {
   Impression,
   CartItem,
 } from './typings/events'
-import { AnalyticsEcommerceProduct } from './typings/gtm'
+import {AnalyticsEcommerceProduct} from './typings/gtm'
 
-export default function() {
+export default function () {
   return null
 } // no-op for extension point
 
@@ -31,7 +31,7 @@ export function handleEvents(e: PixelMessage) {
     }
 
     case 'vtex:productView': {
-      const { selectedSku, productName, brand, categories } = e.data.product
+      const {selectedSku, productName, brand, categories} = e.data.product
 
       let price
 
@@ -65,7 +65,7 @@ export function handleEvents(e: PixelMessage) {
     }
 
     case 'vtex:productClick': {
-      const { productName, brand, categories, sku } = e.data.product
+      const {productName, brand, categories, sku} = e.data.product
 
       let price
 
@@ -99,7 +99,7 @@ export function handleEvents(e: PixelMessage) {
     }
 
     case 'vtex:addToCart': {
-      const { items } = e.data
+      const {items} = e.data
 
       push({
         ecommerce: {
@@ -122,8 +122,52 @@ export function handleEvents(e: PixelMessage) {
       return
     }
 
+    case 'vtex:promoView': {
+      const {imageInfo} = e.data
+      const regExp = /\/arquivos\/ids\/(\w+)\//g
+
+      push({
+        event: "promoView",
+        ecommerce: {
+          promoView: {
+            promotions: [
+              {
+                'id': regExp.exec(imageInfo.src)?.[1],
+                'name': imageInfo.title || imageInfo.alt,
+                'creative': imageInfo.src,
+                'position': imageInfo.position,
+              }
+            ]
+          }
+        }
+      })
+      return
+    }
+
+    case 'vtex:promoClick': {
+      const {imageInfo} = e.data
+      const regExp = /\/arquivos\/ids\/(\w+)\//g
+
+      push({
+        event: "promoClick",
+        ecommerce: {
+          promoClick: {
+            promotions: [ // Array of promotionObjects.
+              {
+                'id': regExp.exec(imageInfo.src)?.[1],
+                'name': imageInfo.title,
+                'creative': imageInfo.src,
+                'position': imageInfo.position,
+              }
+            ]
+          }
+        }
+      })
+
+      return
+    }
     case 'vtex:removeFromCart': {
-      const { items } = e.data
+      const {items} = e.data
 
       push({
         ecommerce: {
@@ -175,7 +219,7 @@ export function handleEvents(e: PixelMessage) {
     }
 
     case 'vtex:productImpression': {
-      const { currency, list, impressions, product, position } = e.data
+      const {currency, list, impressions, product, position} = e.data
       let oldImpresionFormat: Record<string, any> | null = null
 
       if (product != null && position != null) {
@@ -204,7 +248,7 @@ export function handleEvents(e: PixelMessage) {
     }
 
     case 'vtex:userData': {
-      const { data } = e
+      const {data} = e
 
       if (!data.isAuthenticated) {
         return
@@ -219,7 +263,7 @@ export function handleEvents(e: PixelMessage) {
     }
 
     case 'vtex:cartLoaded': {
-      const { orderForm } = e.data
+      const {orderForm} = e.data
 
       push({
         event: 'checkout',
@@ -280,7 +324,7 @@ function removeStartAndEndSlash(category?: string) {
 }
 
 function getProductImpressionObjectData(list: string) {
-  return ({ product, position }: Impression) => ({
+  return ({product, position}: Impression) => ({
     brand: product.brand,
     category: getCategory(product.categories),
     id: product.sku.itemId,

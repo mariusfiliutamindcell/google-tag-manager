@@ -15,6 +15,8 @@ export interface PixelMessage extends MessageEvent {
     | UserData
     | CartIdData
     | CartData
+    | ImageShow
+    | ImageClick
 }
 
 export interface EventData {
@@ -29,6 +31,35 @@ export interface PageInfoData extends EventData {
   accountName: string
   pageTitle: string
   pageUrl: string
+}
+
+
+export interface ImageData extends EventData {
+  event: 'imageInfo'
+  imageInfo: {
+    src?: string
+    alt?: string
+    maxWidth?: string
+    maxHeight?: string
+    minWidth?: string
+    minHeight?: string
+    width?: string
+    height?: string
+    srcSet?: string
+    sizes?: string
+    link?: string
+    title?: string
+    position?: number
+  }
+}
+
+export interface ImageDisplay extends ImageData {
+  eventName: 'vtex:displayImage'
+}
+
+export interface ImageClick extends ImageData {
+  event: 'pageInfo'
+  eventName: 'vtex:imageClick'
 }
 
 export interface UserData extends PageInfoData {
